@@ -1,35 +1,82 @@
 
 import "dotenv/config";
 
+// ==========================================
+// ENV HELPERS
+// ==========================================
+
+function envBoolean(name, defaultValue = true) {
+  const value = process.env[name];
+
+  if (value === undefined || value === "") {
+    return defaultValue;
+  }
+
+  return value.trim().toLowerCase() === "true";
+}
+
+function envNumber(name, defaultValue) {
+  const value = process.env[name];
+
+  if (value === undefined || value === "") {
+    return defaultValue;
+  }
+
+  const number = Number(value);
+
+  if (!Number.isSafeInteger(number) || number <= 0) {
+    throw new Error(
+      `Invalid ${name}: expected a positive integer`
+    );
+  }
+
+  return number;
+}
+
+// ==========================================
+// CONFIG
+// ==========================================
+
 export const config = {
+  // TELEGRAM
   TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN,
 
+  // BINANCE
   BINANCE_BASE_URL: (
     process.env.BINANCE_BASE_URL ||
     "https://fapi.binance.com"
   ).replace(/\/$/, ""),
 
-  TIMEFRAME: "15m",
-  CANDLE_COUNT: 20,
-  TIMEZONE: "Asia/Ho_Chi_Minh",
+  // ANALYSIS
+  TIMEFRAME: process.env.TIMEFRAME || "15m",
 
-  // ==========================================
+  CANDLE_COUNT: envNumber("CANDLE_COUNT", 20),
+
+  TIMEZONE:
+    process.env.TIMEZONE || "Asia/Ho_Chi_Minh",
+
   // TELEGRAM OUTPUT SETTINGS
-  // ==========================================
-
-  // 1. Basis M15 text message
   SEND_BASIS_MESSAGE:
-    process.env.SEND_BASIS_MESSAGE !== "false",
+    envBoolean("SEND_BASIS_MESSAGE", true),
 
-  // 2. Basis Rate M15 chart
   SEND_BASIS_CHART:
-    process.env.SEND_BASIS_CHART !== "false",
+    envBoolean("SEND_BASIS_CHART", true),
 
-  // 3. Futures vs Index M15 chart
   SEND_PRICE_CHART:
-    process.env.SEND_PRICE_CHART !== "false"
+    envBoolean("SEND_PRICE_CHART", true)
 };
+
+// ==========================================
+// VALIDATION
+// ==========================================
 
 if (!config.TELEGRAM_BOT_TOKEN) {
   throw new Error("Missing TELEGRAM_BOT_TOKEN");
+}
+
+// Current analyzers and charts are designed for M15.
+if (config.TIMEFRAME !== "15m") {
+  throw new Error(
+    "Current bot supports TIMEFRAME=15m only"
+  );
 }
