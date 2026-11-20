@@ -1,0 +1,17 @@
+
+{
+  "name": "binance-basis-m15",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "chart.js": "^4.4.8",
+    "chartjs-node-canvas": "^5.0.0",
+    "dotenv": "^16.4.5"
+  }
+}
